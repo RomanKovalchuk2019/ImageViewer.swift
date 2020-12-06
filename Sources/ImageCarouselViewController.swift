@@ -5,6 +5,10 @@ public protocol ImageDataSource:class {
     func imageItem(at index:Int) -> ImageItem
 }
 
+public protocol ImageDelegate: class {
+    func pageDidChange(index: Int)
+}
+
 class ImageCarouselViewController:UIPageViewController, ImageViewerTransitionViewControllerConvertible {
     
     unowned var initialSourceView: UIImageView?
@@ -23,7 +27,8 @@ class ImageCarouselViewController:UIPageViewController, ImageViewerTransitionVie
     }
     
     weak var imageDatasource:ImageDataSource?
- 
+    weak var imageDelegate: ImageDelegate?
+    
     var initialIndex = 0
     
     var theme:ImageViewerTheme = .light {
@@ -59,6 +64,7 @@ class ImageCarouselViewController:UIPageViewController, ImageViewerTransitionVie
     public init(
         sourceView:UIImageView,
         imageDataSource: ImageDataSource?,
+        delegate: ImageDelegate?,
         options:[ImageViewerOption] = [],
         initialIndex:Int = 0) {
         
@@ -66,7 +72,9 @@ class ImageCarouselViewController:UIPageViewController, ImageViewerTransitionVie
         self.initialIndex = initialIndex
         self.options = options
         self.imageDatasource = imageDataSource
+        self.imageDelegate = delegate
         let pageOptions = [UIPageViewController.OptionsKey.interPageSpacing: 20]
+        
         super.init(
             transitionStyle: .scroll,
             navigationOrientation: .horizontal,
@@ -137,7 +145,8 @@ class ImageCarouselViewController:UIPageViewController, ImageViewerTransitionVie
         applyOptions()
         
         dataSource = self
-
+        delegate = self
+        
         if let imageDatasource = imageDatasource {
             let initialVC:ImageViewerController = .init(
                 index: initialIndex,
@@ -207,5 +216,16 @@ extension ImageCarouselViewController:UIPageViewControllerDataSource {
         return ImageViewerController.init(
             index: newIndex,
             imageItem: imageDatasource.imageItem(at: newIndex))
+    }
+}
+
+extension ImageCarouselViewController: UIPageViewControllerDelegate {
+    func pageViewController(
+        _ pageViewController: UIPageViewController,
+        didFinishAnimating finished: Bool,
+        previousViewControllers: [UIViewController],
+        transitionCompleted completed: Bool) {
+        guard let index = (pageViewController.viewControllers?.first as? ImageViewerController)?.index else { return }
+        imageDelegate?.pageDidChange(index: index)
     }
 }

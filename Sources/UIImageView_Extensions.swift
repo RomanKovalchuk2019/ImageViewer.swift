@@ -6,6 +6,7 @@ extension UIImageView {
     private class TapWithDataRecognizer:UITapGestureRecognizer {
         weak var from:UIViewController?
         var imageDatasource:ImageDataSource?
+        var imageDelegate: ImageDelegate?
         var initialIndex:Int = 0
         var options:[ImageViewerOption] = []
     }
@@ -17,10 +18,12 @@ extension UIImageView {
     }
     
     public func setupImageViewer(
+        delegate: ImageDelegate? = nil,
         options:[ImageViewerOption] = [],
         from:UIViewController? = nil) {
         setup(
             datasource: SimpleImageDatasource(imageItems: [.image(image)]),
+            delegate: delegate,
             options: options,
             from: from)
     }
@@ -28,6 +31,7 @@ extension UIImageView {
     #if canImport(SDWebImage)
     public func setupImageViewer(
         url:URL,
+        delegate: ImageDelegate? = nil,
         initialIndex:Int = 0,
         placeholder: UIImage? = nil,
         options:[ImageViewerOption] = [],
@@ -39,6 +43,7 @@ extension UIImageView {
         })
         setup(
             datasource: datasource,
+            delegate: delegate,
             initialIndex: initialIndex,
             options: options,
             from: from)
@@ -47,6 +52,7 @@ extension UIImageView {
     
     public func setupImageViewer(
         images:[UIImage],
+        delegate: ImageDelegate? = nil,
         initialIndex:Int = 0,
         options:[ImageViewerOption] = [],
         from:UIViewController? = nil) {
@@ -57,6 +63,7 @@ extension UIImageView {
         })
         setup(
             datasource: datasource,
+            delegate: delegate,
             initialIndex: initialIndex,
             options: options,
             from: from)
@@ -65,6 +72,7 @@ extension UIImageView {
     #if canImport(SDWebImage)
     public func setupImageViewer(
         urls:[URL],
+        delegate: ImageDelegate? = nil,
         initialIndex:Int = 0,
         options:[ImageViewerOption] = [],
         placeholder: UIImage? = nil,
@@ -76,6 +84,7 @@ extension UIImageView {
         })
         setup(
             datasource: datasource,
+            delegate: delegate,
             initialIndex: initialIndex,
             options: options,
             from: from)
@@ -84,12 +93,14 @@ extension UIImageView {
     
     public func setupImageViewer(
         datasource:ImageDataSource,
+        delegate: ImageDelegate? = nil,
         initialIndex:Int = 0,
         options:[ImageViewerOption] = [],
         from:UIViewController? = nil) {
         
         setup(
             datasource: datasource,
+            delegate: delegate,
             initialIndex: initialIndex,
             options: options,
             from: from)
@@ -97,6 +108,7 @@ extension UIImageView {
     
     private func setup(
         datasource:ImageDataSource?,
+        delegate: ImageDelegate? = nil,
         initialIndex:Int = 0,
         options:[ImageViewerOption] = [],
         from: UIViewController? = nil) {
@@ -124,17 +136,20 @@ extension UIImageView {
         _tapRecognizer!.initialIndex = initialIndex
         _tapRecognizer!.options = options
         _tapRecognizer!.from = from
+        _tapRecognizer!.imageDelegate = delegate
         addGestureRecognizer(_tapRecognizer!)
     }
     
     @objc
     private func showImageViewer(_ sender:TapWithDataRecognizer) {
         guard let sourceView = sender.view as? UIImageView else { return }
-        let imageCarousel = ImageCarouselViewController.init(
+        let imageCarousel = ImageCarouselViewController(
             sourceView: sourceView,
             imageDataSource: sender.imageDatasource,
+            delegate: sender.imageDelegate,
             options: sender.options,
-            initialIndex: sender.initialIndex)
+            initialIndex: sender.initialIndex
+        )
         let presentFromVC = sender.from ?? vc
         presentFromVC?.present(imageCarousel, animated: true)
     }
