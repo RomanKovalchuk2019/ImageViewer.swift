@@ -115,7 +115,6 @@ extension ImageViewerTransitionPresentationAnimator: UIViewControllerAnimatedTra
   
         let sourceView = transitionVC.sourceView
         let targetView = transitionVC.targetView
-        
         let dummyImageView = createDummyImageView(
             frame: targetView?.frameRelativeToWindow() ?? UIScreen.main.bounds,
             image: targetView?.image)

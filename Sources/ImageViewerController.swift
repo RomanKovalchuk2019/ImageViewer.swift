@@ -283,7 +283,7 @@ extension ImageViewerController {
             animations: {
                 self.imageView.center = self.view.center
                 self.backgroundView?.alpha = 1.0
-        }) {[weak self] _ in
+        }) { [weak self] _ in
             self?.isAnimating = false
         }
     }

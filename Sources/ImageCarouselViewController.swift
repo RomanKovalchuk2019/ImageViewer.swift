@@ -7,19 +7,20 @@ public protocol ImageDataSource:class {
 
 public protocol ImageDelegate: class {
     func pageDidChange(index: Int)
+    func sourceViewForItem(at index: Int) -> UIImageView?
 }
 
 class ImageCarouselViewController:UIPageViewController, ImageViewerTransitionViewControllerConvertible {
     
-    unowned var initialSourceView: UIImageView?
-    var sourceView: UIImageView? {
+    weak var initialSourceView: UIImageView?
+    weak var sourceView: UIImageView? {
         guard let vc = viewControllers?.first as? ImageViewerController else {
             return nil
         }
-        return initialIndex == vc.index ? initialSourceView : nil
+        return initialIndex == vc.index ? initialSourceView : imageDelegate?.sourceViewForItem(at: vc.index)
     }
     
-    var targetView: UIImageView? {
+    weak var targetView: UIImageView? {
         guard let vc = viewControllers?.first as? ImageViewerController else {
             return nil
         }
@@ -164,12 +165,13 @@ class ImageCarouselViewController:UIPageViewController, ImageViewerTransitionVie
         sourceView?.alpha = 1.0
         UIView.animate(withDuration: 0.235, animations: {
             self.view.alpha = 0.0
-        }) { _ in
-            self.dismiss(animated: false, completion: completion)
+        }) { [weak self] _ in
+            self?.dismiss(animated: false, completion: completion)
         }
     }
     
     deinit {
+        print("Here Deinint of page")
         initialSourceView?.alpha = 1.0
     }
     
@@ -226,6 +228,9 @@ extension ImageCarouselViewController: UIPageViewControllerDelegate {
         previousViewControllers: [UIViewController],
         transitionCompleted completed: Bool) {
         guard let index = (pageViewController.viewControllers?.first as? ImageViewerController)?.index else { return }
+        initialSourceView?.alpha = 1
+        initialSourceView = imageDelegate?.sourceViewForItem(at: index)
+        initialSourceView?.alpha = 0
         imageDelegate?.pageDidChange(index: index)
     }
 }

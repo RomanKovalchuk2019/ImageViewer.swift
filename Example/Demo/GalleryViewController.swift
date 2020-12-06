@@ -48,6 +48,10 @@ class WithImagesViewController:UIViewController {
         updateLayout(view.frame.size)
     }
     
+    deinit {
+        print("Deinit")
+    }
+    
     private func updateLayout(_ size:CGSize) {
         if size.width > size.height {
             layout.columns = 4
@@ -95,6 +99,11 @@ extension WithImagesViewController:UICollectionViewDataSource {
 }
 
 extension WithImagesViewController: ImageDelegate {
+    func sourceViewForItem(at index: Int) -> UIImageView? {
+        guard let cell = collectionView.cellForItem(at: IndexPath(row: index, section: 0)) as? ThumbCell else { return nil }
+        return cell.imageView
+    }
+    
     func pageDidChange(index: Int) {
         print("Here \(index)")
     }
