@@ -87,8 +87,15 @@ extension WithImagesViewController:UICollectionViewDataSource {
         // Setup Image Viewer with [UIImage]
         cell.imageView.setupImageViewer(
             images: images,
+            delegate: self,
             initialIndex: indexPath.item)
         
         return cell
+    }
+}
+
+extension WithImagesViewController: ImageDelegate {
+    func pageDidChange(index: Int) {
+        print("Here \(index)")
     }
 }
